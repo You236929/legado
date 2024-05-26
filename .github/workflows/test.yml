@@ -73,7 +73,7 @@ jobs:
           sed '$a\RELEASE_KEY_ALIAS=legado'                 $GITHUB_WORKSPACE/gradle.properties -i
           sed '$a\RELEASE_STORE_PASSWORD=gedoor_legado'     $GITHUB_WORKSPACE/gradle.properties -i
           sed '$a\RELEASE_KEY_PASSWORD=gedoor_legado'       $GITHUB_WORKSPACE/gradle.properties -i
-          
+
           sed '$a\RELEASE_KEY_PASSWORD=gedoor_legado'       $GITHUB_WORKSPACE/gradle.properties -i
 
       - name: Set cache read only val
@@ -82,6 +82,8 @@ jobs:
           if [ ${{ env.type }} == 'release' ]; then
             gradle_cache_read_only="false"
           fi
+          ###### set false
+          gradle_cache_read_only="false"
           echo "gradle cache read only : $gradle_cache_read_only"
           echo "gradle_cache_read_only=$gradle_cache_read_only" >> $GITHUB_ENV
 
