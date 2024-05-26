@@ -92,19 +92,19 @@ jobs:
           if [ ${{ env.type }} == 'releaseManaga' ]; then
             fix_app_name="阅读·漫画"
             typeName="$fix_app_name"
-            fix_ic_launcher="ic_launcher5"
+            fix_ic_launcher="launcher5"
           elif [ ${{ env.type }} == 'releaseCommon' ]; then
             fix_app_name="阅读·常用"
             typeName="$fix_app_name"
-            fix_ic_launcher="ic_launcher3"
+            fix_ic_launcher="launcher3"
           elif [ ${{ env.type }} == 'releaseVideo' ]; then
             fix_app_name="阅读·视频"
             typeName="$fix_app_name"
-            fix_ic_launcher="ic_launcher2"
+            fix_ic_launcher="launcher2"
           elif [ ${{ env.type }} == 'releaseA' ]; then
             fix_app_name="阅读·测试"
             typeName="$fix_app_name"
-            fix_ic_launcher="ic_launcher1"
+            fix_ic_launcher="launcher1"
           else
             echo ""
           fi
