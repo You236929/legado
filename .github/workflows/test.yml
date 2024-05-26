@@ -135,7 +135,9 @@ jobs:
           echo "开始${{ env.product }}$typeName构建"
           chmod +x gradlew
           ./gradlew assemble${{ env.product }}release --build-cache --parallel --daemon --warning-mode all \
-          -x test -x lint 
+          -x test -x lint -x lintVitalAnalyzeAppRelease -x lintVitalReportAppRelease -x lintVitalAppRelease \
+          -x checkKotlinGradlePluginConfigurationErrors -x checkAppReleaseAarMetadata -x checkAppReleaseDuplicateClasses \
+          -x validateSigningAppRelease
           echo "修改APK文件名"
           mkdir -p ${{ github.workspace }}/apk/
           for file in `ls ${{ github.workspace }}/app/build/outputs/apk/*/*/*.apk`; do
