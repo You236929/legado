@@ -44,7 +44,7 @@ jobs:
     strategy:
       matrix:
         product: [ app ]
-        type: [ release, releaseA ]
+        type: [ release, releaseA, releaseCommon, releaseManaga, releaseVideo ]
       fail-fast: false
     runs-on: ubuntu-latest
     env:
@@ -84,14 +84,42 @@ jobs:
             typeName="原包名"
           else
             typeName="共存"
-            sed "s/'.release'/'.releaseA'/" $GITHUB_WORKSPACE/app/build.gradle  -i
-            sed 's/.release/.releaseA/'     $GITHUB_WORKSPACE/app/google-services.json -i
+            sed "s/'.release'/'.${{ env.type }}'/" $GITHUB_WORKSPACE/app/build.gradle  -i
+            sed 's/.release/.${{ env.type }}/'     $GITHUB_WORKSPACE/app/google-services.json -i
           fi
+          fix_app_name="阅读"
+          fix_ic_launcher="ic_launcher"
+          if [ ${{ env.type }} == 'releaseManaga' ]; then
+            fix_app_name="阅读·漫画"
+            typeName="$fix_app_name"
+            fix_ic_launcher="ic_launcher5"
+          elif [ ${{ env.type }} == 'releaseCommon' ]; then
+            fix_app_name="阅读·常用"
+            typeName="$fix_app_name"
+            fix_ic_launcher="ic_launcher3"
+          elif [ ${{ env.type }} == 'releaseVideo' ]; then
+            fix_app_name="阅读·视频"
+            typeName="$fix_app_name"
+            fix_ic_launcher="ic_launcher2"
+          elif [ ${{ env.type }} == 'releaseA' ]; then
+            fix_app_name="阅读·测试"
+            typeName="$fix_app_name"
+            fix_ic_launcher="ic_launcher1"
+          else
+            echo ""
+          fi
+          echo "替换 App Name"
+          sed -i "s/\"app_name\">阅读</\"app_name\">${fix_app_name}</g" $GITHUB_WORKSPACE/app/src/main/res/values-zh/strings.xml
+          sed -i "s/\"receiving_shared_label\">阅读·搜索</\"receiving_shared_label\">${fix_app_name}·搜索</g" $GITHUB_WORKSPACE/app/src/main/res/values-zh/strings.xml
+          echo "替换 App logo"
+          sed -i "s/ic_launcher/${fix_ic_launcher}/g" $GITHUB_WORKSPACE/app/src/main/AndroidManifest.xml
+
+
           echo "统一版本号"
           sed "/def version/c def version = \"${{ env.VERSION }}\"" $GITHUB_WORKSPACE/app/build.gradle  -i
           echo "开始${{ env.product }}$typeName构建"
           chmod +x gradlew
-          ./gradlew assemble${{ env.product }}release --build-cache --parallel --daemon --warning-mode all
+          ./gradlew assemble${{ env.product }}release --build-cache --parallel --daemon --warning-mode all -x test -x lint
           echo "修改APK文件名"
           mkdir -p ${{ github.workspace }}/apk/
           for file in `ls ${{ github.workspace }}/app/build/outputs/apk/*/*/*.apk`; do
