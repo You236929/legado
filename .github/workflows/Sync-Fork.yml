@@ -1,0 +1,111 @@
+name: Sync-Fork
+on:
+  push:
+    paths:
+      - '.github/workflows/Sync-Fork.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+
+# run one workflow
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true  # true false
+
+
+jobs:
+  sync_fork:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v3
+      - name: Get first git  commit id
+        run: |
+          
+          set -x
+          echo "first_commit_id=`git rev-parse HEAD`" >> $GITHUB_ENV
+          echo "current git commit id: ${{ env.first_commit_id }}"
+
+      # - uses: tgymnich/fork-sync@v2.0.9
+      #   with:
+      #     owner: gedoor
+      #     base: master
+      #     head: master
+      #     retries: 1
+      #     retry_after: 10
+      #     ignore_fail: true
+      #     merge_method: rebase
+
+      # - name: repo-sync
+      #   uses: repo-sync/github-sync@v2
+      #   with:
+      #     source_repo: gedoor/legado
+      #     source_branch: master
+      #     destination_branch: master
+      #     github_token: ${{ github.token }}
+      - name: Pull (Fast-Forward) upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v2.1
+        with:
+          upstream_repository: gedoor/legado
+          upstream_branch: master
+          target_branch: master
+          # git_pull_args: --ff-only                    # optional arg use, defaults to simple 'pull'
+          github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
+
+
+      # - name: fork sync
+        # env:
+          # GH_TOKEN: ${{ github.token }}
+        # run: |
+          # gh repo sync ${{ github.repository }} -b master
+          # curl -L \
+            # -X POST \
+            # -H "Accept: application/vnd.github+json" \
+            # -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            # -H "X-GitHub-Api-Version: 2022-11-28" \
+            # https://github.com/${{ github.repository }}/branches/fetch_and_merge/master
+          #  https://api.github.com/repos/${{ github.repository }}/merge-upstream \
+          #  -d '{"branch":"master"}'
+
+          # git config --local user.name "GitHub Action"
+          # git config --local user.email "action@github.com"
+          # git remote add upstream https://github.com/gedoor/legado.git
+          # git remote -v
+
+          # # echo "git fetch upstream"
+          # git fetch upstream
+
+          # git checkout -b t_upstream  upstream/master
+          # # git checkout master
+
+          # echo "git merge upstream"
+          # git merge master --squash --allow-unrelated-histories
+          
+          # echo "git push"
+          # git push -f origin master
+
+
+      - name: Get second git commit id
+        run: |
+          set -x
+          echo "second_commit_id=`git rev-parse HEAD`" >> $GITHUB_ENV
+          echo "current git commit id: ${{ env.second_commit_id }}"
+
+      - name: PING - Dispatch initiating repository event
+        if: ${{ env.first_commit_id != env.second_commit_id }}
+        run: |
+          echo "${{ github.repository }}"
+           curl -X POST https://api.github.com/repos/${{ github.repository }}/actions/workflows/my_test.yml/dispatches \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            --data '{"event_type": "ping", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'" }}'
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 3
+          keep_minimum_runs: 2
