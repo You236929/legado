@@ -1,0 +1,74 @@
+#更新fork
+name: My update fork
+
+on:
+  workflow_dispatch: 
+  schedule:
+    - cron: '0 16 * * *' #0点定时任务
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.repository.owner.id == github.event.sender.id && github.actor != 'gedoor' }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set env
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "github-actions"
+    - name: Update fork
+      continue-on-error: true
+      run: |
+        git_pull_ok="false"
+        echo "git_pull_ok=$git_pull_ok" >> $GITHUB_ENV
+        git remote add upstream https://github.com/gedoor/legado.git
+        git remote -v
+        git fetch upstream
+        git checkout master
+        # git merge upstream/master
+        git pull upstream master --rebase
+        git push origin master
+        gradle_cache_read_only="true"
+        
+        git_pull_ok="true"
+        echo "git_pull_ok=$git_pull_ok" >> $GITHUB_ENV
+
+    - name: Dispatches Action
+      continue-on-error: true
+      if: startsWith(env.git_pull_ok,'true')
+      run: |
+        user="$GITHUB_REPOSITORY_OWNER"
+        repository_list=("${{ github.repository }}" 
+              )
+
+        for tmp_repository in ${repository_list[*]}; do
+            echo "${tmp_repository}"
+            echo ""
+            tmp_data=`curl -X POST https://api.github.com/repos/${tmp_repository}/dispatches \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            --data '{"event_type": "ping build", "client_payload": { "repository": "'"${tmp_repository}"'" }}' `
+            echo ""
+            echo "$tmp_data"
+            echo ""
+            if echo $tmp_data |grep -q 'Not Found'; then
+              echo "普通触发失败， 使用密钥触发 ..."
+              curl -X POST https://api.github.com/repos/${tmp_repository}/dispatches \
+              -H 'Accept: application/vnd.github+json' \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              --data '{"event_type": "ping build", "client_payload": { "repository": "'"${tmp_repository}"'" }}' 
+            else
+              echo "触发成功： ${tmp_repository}"
+            fi
+        done
+
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@v2
+      continue-on-error: true
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        retain_days: 5
+        keep_minimum_runs: 2
+
