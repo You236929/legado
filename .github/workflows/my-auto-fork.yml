@@ -22,6 +22,11 @@ jobs:
       run: |
         git config --global user.email "github-actions@github.com"
         git config --global user.name "github-actions"
+
+        # 设置上游仓库变量
+        upstream_repository="gedoor/legado"
+        echo "upstream_repository=$upstream_repository" >> $GITHUB_ENV
+
     - name: Update fork
       continue-on-error: true
       run: |
@@ -36,9 +41,6 @@ jobs:
         # # git pull upstream master --rebase
         # git merge-base refs/heads/master refs/remotes/upstream/master
         # git push origin master
-
-        upstream_repository="gedoor/legado"
-        echo "upstream_repository=$upstream_repository" >> $GITHUB_ENV
 
         sed -i "s#${{ github.repository }}#${{ env.upstream_repository }}#g" .git/config
         git fetch
