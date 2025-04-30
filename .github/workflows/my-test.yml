@@ -115,7 +115,7 @@ jobs:
           test -f $t_file && cat -n  $t_file
 
           t_file="$GITHUB_WORKSPACE/app/src/main/java/io/legado/app/help/update/AppUpdateGitHub.kt"
-          test -f $t_file && sed -i "s#it.downloadUrl#"${proxy_host}/"+it.downloadUrl#g"  $t_file
+          test -f $t_file && sed -i 's#it.downloadUrl#"${proxy_host}/"+it.downloadUrl#g'  $t_file
           test -f $t_file && cat -n  $t_file
 
       - name: Set cache read only val
