@@ -2,6 +2,11 @@
 name: My update fork
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/my-auto-fork.yml'
   workflow_dispatch: 
   schedule:
     - cron: '0 16 * * *' #0点定时任务
@@ -25,7 +30,7 @@ jobs:
         git remote add upstream https://github.com/gedoor/legado.git
         git remote -v
         git fetch upstream
-        git checkout master
+        # git checkout master
         # git merge upstream/master
         # git pull upstream master --rebase
         git merge-base refs/heads/master refs/remotes/upstream/master
