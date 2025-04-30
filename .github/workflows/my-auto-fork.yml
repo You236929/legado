@@ -36,6 +36,7 @@ jobs:
         git merge-base refs/heads/master refs/remotes/upstream/master
         git push origin master
         
+        echo "git push origin master"
         git_pull_ok="true"
         echo "git_pull_ok=$git_pull_ok" >> $GITHUB_ENV
 
