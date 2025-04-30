@@ -121,12 +121,12 @@ jobs:
 
       - name: Set cache read only val
         run: |
-          gradle_cache_read_only="true"
+          gradle_cache_read_only="false"
           if [ ${{ env.type }} == 'release' ]; then
-            gradle_cache_read_only="false"
+            gradle_cache_read_only="true"
           fi
           ###### set false
-          gradle_cache_read_only="false"
+          # gradle_cache_read_only="false"
           echo "gradle cache read only : $gradle_cache_read_only"
           echo "gradle_cache_read_only=$gradle_cache_read_only" >> $GITHUB_ENV
 
