@@ -42,12 +42,14 @@ jobs:
         # git merge-base refs/heads/master refs/remotes/upstream/master
         # git push origin master
 
-        sed -i "s#${{ github.repository }}#${{ env.upstream_repository }}#g" .git/config
-        git fetch
-        git pull --rebase
-        sed -i "s#${{ env.upstream_repository }}#${{ github.repository }}#g" .git/config
-        git pull --rebase
-        git push
+        # sed -i "s#${{ github.repository }}#${{ env.upstream_repository }}#g" .git/config
+        # git fetch
+        # git pull --rebase
+        # sed -i "s#${{ env.upstream_repository }}#${{ github.repository }}#g" .git/config
+        # git pull --rebase
+        # git push
+
+        gh repo sync ${{ env.upstream_repository }} -b master
         
         echo "git push ...."
         git_pull_ok="true"
