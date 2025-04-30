@@ -105,18 +105,19 @@ jobs:
 
       - name: proxy github url
         continue-on-error: true
+        env:
+          proxy_host: https://gh.llkk.cc
         run: |
           echo "proxy github url"
-          proxy_host="https://gh.llkk.cc"
-          curl "${proxy_host}/https://api.github.com/repos/oopsunix/ghproxy"
+          curl "${{env.proxy_host}}/https://api.github.com/repos/oopsunix/ghproxy"
 
           t_file="$GITHUB_WORKSPACE/app/src/main/java/io/legado/app/help/update/AppUpdateGitHub.kt"
 
-          test -f $t_file && sed -i "s#https://api.github.com#${proxy_host}/https://api.github.com#g"  $t_file
+          test -f $t_file && sed -i "s#https://api.github.com#${{env.proxy_host}}/https://api.github.com#g"  $t_file
           test -f $t_file && cat -n  $t_file
 
           t_file="$GITHUB_WORKSPACE/app/src/main/java/io/legado/app/help/update/AppUpdateGitHub.kt"
-          test -f $t_file && sed -i 's#it.downloadUrl#"${proxy_host}/"+it.downloadUrl#g'  $t_file
+          test -f $t_file && sed -i 's#it.downloadUrl#"${{env.proxy_host}}/"+it.downloadUrl#g'  $t_file
           test -f $t_file && cat -n  $t_file
 
       - name: Set cache read only val
