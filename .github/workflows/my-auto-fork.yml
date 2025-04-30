@@ -46,7 +46,7 @@ jobs:
         git fetch
         git pull --rebase
         sed -i "s#${{ env.upstream_repository }}#${{ github.repository }}#g" .git/config
-        git pull
+        git pull --rebase
         git push
         
         echo "git push ...."
