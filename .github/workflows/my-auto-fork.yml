@@ -27,16 +27,26 @@ jobs:
       run: |
         git_pull_ok="false"
         echo "git_pull_ok=$git_pull_ok" >> $GITHUB_ENV
-        git remote add upstream https://github.com/gedoor/legado.git
-        git remote -v
-        git fetch upstream
-        # git checkout master
-        # git merge upstream/master
-        # git pull upstream master --rebase
-        git merge-base refs/heads/master refs/remotes/upstream/master
-        git push origin master
+
+        # git remote add upstream https://github.com/gedoor/legado.git
+        # git remote -v
+        # git fetch upstream
+        # # git checkout master
+        # # git merge upstream/master
+        # # git pull upstream master --rebase
+        # git merge-base refs/heads/master refs/remotes/upstream/master
+        # git push origin master
+
+        upstream_repository="gedoor/legado"
+        echo "upstream_repository=$upstream_repository" >> $GITHUB_ENV
+
+        sed -i "s#${{ github.repository }}#${{ env.upstream_repository }}#g" .git/config
+        git fetch
+        git pull
+        sed -i "s#${{ env.upstream_repository }}#${{ github.repository }}#g" .git/config
+        git push
         
-        echo "git push origin master"
+        echo "git push ...."
         git_pull_ok="true"
         echo "git_pull_ok=$git_pull_ok" >> $GITHUB_ENV
 
