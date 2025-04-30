@@ -44,7 +44,7 @@ jobs:
 
         sed -i "s#${{ github.repository }}#${{ env.upstream_repository }}#g" .git/config
         git fetch
-        git pull
+        git pull --rebase
         sed -i "s#${{ env.upstream_repository }}#${{ github.repository }}#g" .git/config
         git push
         
