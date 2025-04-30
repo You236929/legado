@@ -29,6 +29,8 @@ jobs:
 
     - name: Update fork
       continue-on-error: true
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
         git_pull_ok="false"
         echo "git_pull_ok=$git_pull_ok" >> $GITHUB_ENV
