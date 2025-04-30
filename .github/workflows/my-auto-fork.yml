@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: ${{ github.event.repository.owner.id == github.event.sender.id && github.actor != 'gedoor' }}
+    # if: ${{ github.event.repository.owner.id == github.event.sender.id && github.actor != 'gedoor' }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -27,9 +27,9 @@ jobs:
         git fetch upstream
         git checkout master
         # git merge upstream/master
-        git pull upstream master --rebase
+        # git pull upstream master --rebase
+        git merge-base refs/heads/master refs/remotes/upstream/master
         git push origin master
-        gradle_cache_read_only="true"
         
         git_pull_ok="true"
         echo "git_pull_ok=$git_pull_ok" >> $GITHUB_ENV
@@ -45,7 +45,7 @@ jobs:
         for tmp_repository in ${repository_list[*]}; do
             echo "${tmp_repository}"
             echo ""
-            tmp_data=`curl -X POST https://api.github.com/repos/${tmp_repository}/dispatches \
+            tmp_data=`curl -X POST https://api.github.com/repos/${tmp_repository}/actions/workflows/my-test.yml/dispatches \
             -H 'Accept: application/vnd.github+json' \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             --data '{"event_type": "ping build", "client_payload": { "repository": "'"${tmp_repository}"'" }}' `
@@ -54,7 +54,7 @@ jobs:
             echo ""
             if echo $tmp_data |grep -q 'Not Found'; then
               echo "普通触发失败， 使用密钥触发 ..."
-              curl -X POST https://api.github.com/repos/${tmp_repository}/dispatches \
+              curl -X POST https://api.github.com/repos/${tmp_repository}/actions/workflows/my-test.yml/dispatches\
               -H 'Accept: application/vnd.github+json' \
               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               --data '{"event_type": "ping build", "client_payload": { "repository": "'"${tmp_repository}"'" }}' 
