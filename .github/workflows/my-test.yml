@@ -12,6 +12,7 @@ on:
       - '!**/modules/web/**'
       - '!.github/workflows/**'
       - '.github/workflows/my_test.yml'
+      - '.github/workflows/my-test.yml'
   pull_request:
     paths-ignore:
       - '**/modules/web/**'
